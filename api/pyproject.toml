@@ -1,0 +1,15 @@
+[project]
+name = "api"
+version = "0.1.0"
+description = "API used by Natachat Customer Service AI"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi[standard]>=0.118.0",
+    "google-genai>=1.42.0",
+    "pwdlib[argon2]>=0.2.1",
+    "pyjwt>=2.10.1",
+    "requests>=2.32.5",
+    "sqlmodel>=0.0.25",
+    "websockets>=15.0.1",
+]
