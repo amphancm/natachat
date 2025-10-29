@@ -328,12 +328,12 @@ export default function Chat() {
 
   return (
     <Layout>
-      <div className="flex h-screen">
+      <div className="flex h-full">
         {/* SIDEBAR */}
         <div
           className={`${
             isRoomListCollapsed ? "w-0" : "w-64"
-          } transition-all duration-300 border-r border-border bg-muted/30 flex flex-col flex-shrink-0 overflow-hidden`}
+          } transition-all duration-300 flex-shrink-0 border-r border-border bg-muted/30 flex flex-col overflow-hidden`}
         >
           {!isRoomListCollapsed && (
             <div className="p-4 border-b border-border">
@@ -426,24 +426,27 @@ export default function Chat() {
         </div>
 
         {/* CHAT AREA */}
-        <div className="flex flex-col flex-1 h-screen overflow-hidden">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsRoomListCollapsed(!isRoomListCollapsed)}
-            className="h-10 w-8 p-0 border-r border-border hover:bg-muted/50"
-          >
-            {isRoomListCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </Button>
+        <div className="flex flex-1 flex-col h-full overflow-hidden">
+          <div className="flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsRoomListCollapsed(!isRoomListCollapsed)}
+              className="h-10 w-8 p-0 border-r border-border hover:bg-muted/50"
+            >
+              {isRoomListCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
+          </div>
+
           {error && (
-            <div className="px-4 py-2 bg-destructive/10 border-b border-destructive/20">
+            <div className="px-4 py-2 bg-destructive/10 border-b border-destructive/20 flex-shrink-0">
               <p className="text-destructive text-sm text-center">{error}</p>
             </div>
           )}
 
           {/* Messages */}
-          {messages.length > 0 ? (
-            <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {messages.length > 0 ? (
               <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
                 {messages.map((msg) => (
                   <div key={msg.id} className="space-y-2">
@@ -494,41 +497,40 @@ export default function Chat() {
                       <div className="flex gap-1 items-center">
                         <div className="w-2 h-2 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                         <div className="w-2 h-2 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                                                <div className="w-2 h-2 bg-muted-foreground/60 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-muted-foreground/60 rounded-full animate-bounce"></div>
                       </div>
                     </div>
                   </div>
                 )}
                 <div ref={messagesEndRef} />
               </div>
-            </div>
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="w-full max-w-2xl px-4 py-6">
-                <h1 className="text-3xl font-semibold text-center mb-8">
-                  {!hasSentMessage ? "What can I help you today?" : currentRoom?.name}
-                </h1>
-                <div className="flex flex-wrap gap-3 justify-center mb-6">
-                  {suggestedQuestions.map((question, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      onClick={() => {
-                        setMessage(question)
-                        if (isConnected) handleSendMessage()
-                      }}
-                      className="rounded-full border-muted hover:border-primary hover:text-white"
-                    >
-                      {question}
-                    </Button>
-                  ))}
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="w-full max-w-2xl px-4 py-6">
+                  <h1 className="text-3xl font-semibold text-center mb-8">
+                    {!hasSentMessage ? "What can I help you today?" : currentRoom?.name}
+                  </h1>
+                  <div className="flex flex-wrap gap-3 justify-center mb-6">
+                    {suggestedQuestions.map((question, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        onClick={() => {
+                          setMessage(question)
+                          if (isConnected) handleSendMessage()
+                        }}
+                        className="rounded-full border-muted hover:border-primary hover:text-white"
+                      >
+                        {question}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-
+            )}
+          </div>
           {/* Input */}
-          <div className="border-t border-border bg-background sticky bottom-0">
+          <div className="flex-shrink-0 border-t border-border bg-background">
             <div className="max-w-3xl mx-auto px-4 py-4">
               <div className="relative">
                 <Textarea
