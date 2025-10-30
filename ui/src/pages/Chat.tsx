@@ -31,12 +31,17 @@ interface Message {
   roomId?: string
 }
 
-function generateRoomName() {
-  return uniqueNamesGenerator({
-    dictionaries: [adjectives, colors, animals],
-    separator: "-",
-    style: "capital",
-  })
+function generateRoomName(message?: string) {
+  if (message) {
+    const words = message.split(" ")
+    return words.slice(0, 5).join(" ")
+  } else {
+    return uniqueNamesGenerator({
+      dictionaries: [adjectives, colors, animals],
+      separator: "-",
+      style: "capital",
+    })
+  }
 }
 
 function waitForSocketOpen(socket: WebSocket, timeout = 5000): Promise<void> {
@@ -203,7 +208,7 @@ export default function Chat() {
       if (!activeRoom) return;
 
       if (activeRoom.isTemp) {
-        const newRoom = await AddRoom(activeRoom.name);
+        const newRoom = await AddRoom(generateRoomName(message));
         activeRoom = newRoom;
       }
 
