@@ -362,11 +362,7 @@ export default function Chat() {
             </div>
           )}
           <div className="flex-1 overflow-y-auto p-2">
-            {rooms.length === 0 ? (
-              <div className="text-center text-muted-foreground text-sm mt-8">
-                No rooms yet. Create your first room to get started.
-              </div>
-            ) : (
+            {rooms.length === 0 ? null : (
               <div className="space-y-1">
                 {rooms.map((room) => (
                   <div key={room.id}>
