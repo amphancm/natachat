@@ -194,16 +194,11 @@ export default function Settings() {
             {serverType === "local" && (
               <div className="space-y-2">
                 <Label>Local Model</Label>
-                <Select value={modelName} onValueChange={setModelName}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Local Model" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    <SelectItem value="llama3-8b">llama3:8b</SelectItem>
-                    <SelectItem value="llama3-13b">llama3:13b</SelectItem>
-                    <SelectItem value="mistral">Mistral</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  value={modelName}
+                  onChange={(e) => setModelName(e.target.value)}
+                  placeholder="Enter Hugging Face model name"
+                />
               </div>
             )}
 

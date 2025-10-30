@@ -4,12 +4,16 @@ import time
 from sqlalchemy.orm import Session
 from libs.db import SessionLocal
 from schemas.models import Setting
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # Initialize module logger (fall back to basicConfig only if no handlers configured)
 logger = logging.getLogger(__name__)
 if not logging.getLogger().handlers:
     logging.basicConfig(level=logging.DEBUG)
 logger.debug("llm module initialized")
+
+# Global cache for the model and tokenizer
+model_cache = {}
 
 def load_setting(db: Session):
     return db.query(Setting).first()
@@ -44,7 +48,23 @@ def get_llm_response(prompt: str) -> str:
 
         if setting.isLocal:
             logger.debug("Using local model branch")
-            return f"Local model response to: {prompt}"
+            try:
+                if setting.modelName not in model_cache:
+                    logger.info(f"Loading model {setting.modelName}...")
+                    tokenizer = AutoTokenizer.from_pretrained(setting.modelName)
+                    model = AutoModelForCausalLM.from_pretrained(setting.modelName)
+                    model_cache[setting.modelName] = (tokenizer, model)
+                else:
+                    logger.info(f"Using cached model {setting.modelName}")
+
+                tokenizer, model = model_cache[setting.modelName]
+                inputs = tokenizer(prompt, return_tensors="pt")
+                outputs = model.generate(**inputs)
+                response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+                return response
+            except Exception as e:
+                logger.exception("Failed to load local model or generate response")
+                return f"Error with local model: {e}"
 
         elif setting.isApi and setting.domainName == "huggingface":
             logger.debug("Using HuggingFace API: model=%s", setting.modelName)
