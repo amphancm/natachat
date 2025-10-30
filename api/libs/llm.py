@@ -53,7 +53,7 @@ def get_llm_response(prompt: str) -> str:
                     logger.info(f"Loading model {setting.modelName}...")
                     try:
                         tokenizer = AutoTokenizer.from_pretrained(setting.modelName)
-                        model = AutoModelForCausalLM.from_pretrained(setting.modelName)
+                        model     = AutoModelForCausalLM.from_pretrained(setting.modelName)
                         model_cache[setting.modelName] = (tokenizer, model)
                     except (OSError, ValueError) as e:
                         logger.error(f"Failed to load user-specified model '{setting.modelName}': {e}")
@@ -62,8 +62,8 @@ def get_llm_response(prompt: str) -> str:
                     logger.info(f"Using cached model {setting.modelName}")
 
                 tokenizer, model = model_cache[setting.modelName]
-                inputs = tokenizer(prompt, return_tensors="pt")
-                outputs = model.generate(**inputs)
+                inputs   = tokenizer(prompt, return_tensors="pt")
+                outputs  = model.generate(**inputs)
                 response = tokenizer.decode(outputs[0], skip_special_tokens=True)
                 return response
             except Exception as e:
@@ -89,7 +89,7 @@ def get_llm_response(prompt: str) -> str:
 
             try:
                 req_start = time.perf_counter()
-                response = requests.post(url, headers=headers, json=payload, timeout=60)
+                response  = requests.post(url, headers=headers, json=payload, timeout=60)
                 req_elapsed = time.perf_counter() - req_start
                 logger.debug("HuggingFace request completed in %.3fs; status=%s", req_elapsed, response.status_code)
             except Exception as e:
@@ -108,7 +108,7 @@ def get_llm_response(prompt: str) -> str:
 
             logger.debug("HuggingFace response data (truncated)=%s", str(data)[:1000])
             if isinstance(data, list) and len(data) > 0 and "generated_text" in data[0]:
-                result = data[0]["generated_text"].replace(full_prompt, "").strip()
+                result  = data[0]["generated_text"].replace(full_prompt, "").strip()
                 elapsed = time.perf_counter() - start_time
                 logger.debug("get_llm_response finished in %.3fs", elapsed)
                 return result
