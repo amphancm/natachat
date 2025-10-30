@@ -197,46 +197,41 @@ export default function Chat() {
   }
 
   const handleSendMessage = async () => {
-    if (!message.trim()) return
+    if (!message.trim()) return;
     try {
-      let activeRoom = currentRoom
-      if (!activeRoom) return
+      let activeRoom = currentRoom;
+      if (!activeRoom) return;
 
       if (activeRoom.isTemp) {
-        const created = await chatApi.createRoom(activeRoom.name)
-        const newRoom: Room = { id: String(created.id), name: created.roomName, isTemp: false }
+        const newRoom = await AddRoom(activeRoom.name);
+        activeRoom = newRoom;
+      }
 
-        setRooms((prev) => [newRoom, ...prev.filter((r) => !r.isTemp)])
-        setCurrentRoom(newRoom)
-        activeRoom = newRoom
-
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
         const newSocket = connectChatSocket(
-          newRoom.id,
+          activeRoom.id,
           (data) => {
             const aiMessage: Message = {
               id: crypto.randomUUID(),
               role: "assistant",
               content: data,
               timestamp: new Date(),
-              roomId: newRoom.id,
+              roomId: activeRoom.id,
               feedback: null,
-            }
-            setMessages((prev) => [...prev, aiMessage])
-            setIsWaitingForResponse(false)
+            };
+            setMessages((prev) => [...prev, aiMessage]);
+            setIsWaitingForResponse(false);
           },
-          (err) => setError(err),
-        )
-
-        newSocket.onopen  = () => setIsConnected(true)
-        newSocket.onclose = () => setIsConnected(false)
-        setSocket(newSocket)
-
-        await waitForSocketOpen(newSocket)
-        newSocket.send(message)
+          (err) => setError(err)
+        );
+        newSocket.onopen = () => {
+          setIsConnected(true);
+          newSocket.send(message);
+        };
+        newSocket.onclose = () => setIsConnected(false);
+        setSocket(newSocket);
       } else {
-        if (!socket) return
-        await waitForSocketOpen(socket)
-        socket.send(message)
+        socket.send(message);
       }
 
       const userMessage: Message = {
@@ -258,18 +253,38 @@ export default function Chat() {
     }
   }
 
-  const handleCreateRoom = () => {
-    const hasTemp = rooms.some((r) => r.isTemp === true)
-    if (hasTemp) return
+  const AddRoom = async (roomName: string) => {
+    try {
+      const created = await chatApi.createRoom(roomName);
+      const newRoom: Room = { id: String(created.id), name: created.roomName, isTemp: false };
+      setRooms((prev) => [newRoom, ...prev.filter((r) => !r.isTemp)]);
+      setCurrentRoom(newRoom);
+      return newRoom;
+    } catch (error) {
+      setError("Failed to create room.");
+      throw error;
+    }
+  };
+
+  const handleNewChat = () => {
+    const hasTemp = rooms.some((r) => r.isTemp === true);
+    if (hasTemp) {
+      const tempRoom = rooms.find((r) => r.isTemp === true);
+      if (tempRoom) {
+        setCurrentRoom(tempRoom);
+        setMessages([]);
+      }
+      return;
+    }
 
     const tempRoom: Room = {
       id: crypto.randomUUID(),
       name: generateRoomName(),
       isTemp: true,
-    }
-    setRooms((prev) => [tempRoom, ...prev])
-    setCurrentRoom(tempRoom)
-  }
+    };
+    setRooms((prev) => [tempRoom, ...prev]);
+    setCurrentRoom(tempRoom);
+  };
 
   const handleDeleteRoom = async (roomId: string) => {
     const target = rooms.find((r) => r.id === roomId)
@@ -338,12 +353,11 @@ export default function Chat() {
           {!isRoomListCollapsed && (
             <div className="p-4 border-b border-border">
               <Button
-                onClick={handleCreateRoom}
-                disabled={loading}
+                onClick={handleNewChat}
                 className="w-full bg-primary hover:bg-primary/90 rounded-lg"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                {loading ? "Creating..." : "Create Room"}
+                New Chat
               </Button>
             </div>
           )}
