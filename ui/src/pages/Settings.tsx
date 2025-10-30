@@ -53,6 +53,7 @@ export default function Settings() {
   const [selectedDomain, setSelectedDomain] = useState(DOMAINS[0].value);
   const [apiKey, setApiKey] = useState("");
   const [modelName, setModelName] = useState(DOMAINS[0].models[0].api);
+  const [localModelName, setLocalModelName] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -64,7 +65,11 @@ export default function Settings() {
         const setting = await getSetting();
         if (setting) {
           if (setting.domainName) setSelectedDomain(setting.domainName);
-          if (setting.modelName) setModelName(setting.modelName);
+          if (setting.isApi) {
+            if (setting.modelName) setModelName(setting.modelName);
+          } else {
+            if (setting.modelName) setLocalModelName(setting.modelName);
+          }
           if (setting.apiKey) setApiKey(setting.apiKey);
           if (setting.isApi) setServerType("api");
           if (setting.isLocal) setServerType("local");
@@ -82,7 +87,7 @@ export default function Settings() {
   async function handleSave() {
     setLoading(true);
     const payload = {
-      modelName,
+      modelName: serverType === "local" ? localModelName : modelName,
       domainName: selectedDomain,
       apiKey: apiKey || null,
       isApi: serverType === "api",
@@ -195,8 +200,8 @@ export default function Settings() {
               <div className="space-y-2">
                 <Label>Local Model</Label>
                 <Input
-                  value={modelName}
-                  onChange={(e) => setModelName(e.target.value)}
+                  value={localModelName}
+                  onChange={(e) => setLocalModelName(e.target.value)}
                   placeholder="e.g. meta-llama/Meta-Llama-3-8B-Instruct"
                 />
               </div>
