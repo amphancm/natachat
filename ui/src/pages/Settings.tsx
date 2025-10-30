@@ -197,7 +197,7 @@ export default function Settings() {
                 <Input
                   value={modelName}
                   onChange={(e) => setModelName(e.target.value)}
-                  placeholder="Enter Hugging Face model name"
+                  placeholder="e.g. meta-llama/Meta-Llama-3-8B-Instruct"
                 />
               </div>
             )}

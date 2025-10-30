@@ -51,9 +51,13 @@ def get_llm_response(prompt: str) -> str:
             try:
                 if setting.modelName not in model_cache:
                     logger.info(f"Loading model {setting.modelName}...")
-                    tokenizer = AutoTokenizer.from_pretrained(setting.modelName)
-                    model = AutoModelForCausalLM.from_pretrained(setting.modelName)
-                    model_cache[setting.modelName] = (tokenizer, model)
+                    try:
+                        tokenizer = AutoTokenizer.from_pretrained(setting.modelName)
+                        model = AutoModelForCausalLM.from_pretrained(setting.modelName)
+                        model_cache[setting.modelName] = (tokenizer, model)
+                    except (OSError, ValueError) as e:
+                        logger.error(f"Failed to load user-specified model '{setting.modelName}': {e}")
+                        return f"Failed to load model '{setting.modelName}'. Please check the model name and try again."
                 else:
                     logger.info(f"Using cached model {setting.modelName}")
 
