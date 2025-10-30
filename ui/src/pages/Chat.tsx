@@ -148,7 +148,7 @@ export default function Chat() {
       (err) => setError(err),
     )
 
-    newSocket.onopen = () => setIsConnected(true)
+    newSocket.onopen  = () => setIsConnected(true)
     newSocket.onclose = () => setIsConnected(false)
     setSocket(newSocket)
 
@@ -227,7 +227,7 @@ export default function Chat() {
           (err) => setError(err),
         )
 
-        newSocket.onopen = () => setIsConnected(true)
+        newSocket.onopen  = () => setIsConnected(true)
         newSocket.onclose = () => setIsConnected(false)
         setSocket(newSocket)
 

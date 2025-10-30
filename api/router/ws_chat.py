@@ -8,7 +8,6 @@ from dependency import get_db
 router = APIRouter(prefix="/ws", tags=["websocket"])
 
 
-
 @router.websocket("/chat/{room_id}/{username}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str, username: str, db: Session = Depends(get_db)):
     try:
