@@ -47,7 +47,7 @@ def get_llm_response(prompt: str) -> str:
         )
 
         if setting.isLocal:
-            logger.debug("Using local model branch")
+            logger.debug("Using local model")
             try:
                 if setting.modelName not in model_cache:
                     logger.info(f"Loading model {setting.modelName}...")
@@ -88,8 +88,8 @@ def get_llm_response(prompt: str) -> str:
             }
 
             try:
-                req_start = time.perf_counter()
-                response  = requests.post(url, headers=headers, json=payload, timeout=60)
+                req_start   = time.perf_counter()
+                response    = requests.post(url, headers=headers, json=payload, timeout=60)
                 req_elapsed = time.perf_counter() - req_start
                 logger.debug("HuggingFace request completed in %.3fs; status=%s", req_elapsed, response.status_code)
             except Exception as e:
