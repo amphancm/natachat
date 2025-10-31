@@ -9,13 +9,13 @@ from dependency import get_db
 router = APIRouter(prefix="/setting", tags=["setting"])
 
 class SettingModel(BaseModel):
-    isLocal: Optional[bool] = True
-    isApi: Optional[bool] = False
+    isLocal: Optional[bool]   = True
+    isApi: Optional[bool]     = False
     domainName: Optional[str] = None         
-    apiKey: Optional[str] = None
-    modelName: Optional[str] = None
+    apiKey: Optional[str]     = None
+    modelName: Optional[str]  = None
     temperature: Optional[float] = 0.7
-    systemPrompt: Optional[str] = None
+    systemPrompt: Optional[str]  = None
 
     class Config:
         orm_mode = True
