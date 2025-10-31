@@ -3,9 +3,9 @@ import logging
 import time
 import torch
 from sqlalchemy.orm import Session
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from libs.db import SessionLocal
 from schemas.models import Setting
-from unsloth import FastLanguageModel
 
 # Initialize module logger (fall back to basicConfig only if no handlers configured)
 logger = logging.getLogger(__name__)
@@ -53,10 +53,11 @@ def get_llm_response(prompt: str) -> str:
                 if setting.modelName not in model_cache:
                     logger.info(f"Loading model {setting.modelName}...")
                     try:
-                        model, tokenizer = FastLanguageModel.from_pretrained(
-                            model_name = setting.modelName,
-                            dtype = None,
-                            load_in_4bit = True,
+                        tokenizer = AutoTokenizer.from_pretrained(setting.modelName)
+                        model = AutoModelForCausalLM.from_pretrained(
+                            setting.modelName,
+                            device_map="auto",
+                            torch_dtype="auto"
                         )
                         model_cache[setting.modelName] = (tokenizer, model)
                     except (OSError, ValueError) as e:
