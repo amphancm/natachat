@@ -48,13 +48,13 @@ def get_llm_response(prompt: str) -> str:
         )
 
         if setting.isLocal:
-            logger.debug("Using local model branch")
+            logger.debug("Using local model")
             try:
                 if setting.modelName not in model_cache:
                     logger.info(f"Loading model {setting.modelName}...")
                     try:
                         tokenizer = AutoTokenizer.from_pretrained(setting.modelName)
-                        model = AutoModelForCausalLM.from_pretrained(setting.modelName)
+                        model     = AutoModelForCausalLM.from_pretrained(setting.modelName)
                         # Check if CUDA is available and move the model to the GPU
                         if torch.cuda.is_available():
                             logger.info("CUDA is available, moving model to GPU")
