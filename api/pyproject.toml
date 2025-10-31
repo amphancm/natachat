@@ -1,7 +1,7 @@
 [project]
 name = "api"
-version = "0.1.0"
-description = "API used by Natachat Customer Service AI"
+version = "0.1.2"
+description = "API used by Natachat AI"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -12,6 +12,6 @@ dependencies = [
     "requests>=2.32.5",
     "sqlmodel>=0.0.25",
     "websockets>=15.0.1",
-    "torch>=2.4.0",
-    "unsloth[cu121-torch240] @ git+https://github.com/unslothai/unsloth.git",
+    "torch>=2.6.0",
+    "transformers>=4.56.2",
 ]

@@ -54,7 +54,7 @@ def get_llm_response(prompt: str) -> str:
                     logger.info(f"Loading model {setting.modelName}...")
                     try:
                         tokenizer = AutoTokenizer.from_pretrained(setting.modelName)
-                        model = AutoModelForCausalLM.from_pretrained(
+                        model     = AutoModelForCausalLM.from_pretrained(
                             setting.modelName,
                             device_map="auto",
                             torch_dtype="auto"
@@ -83,7 +83,7 @@ def get_llm_response(prompt: str) -> str:
 
         elif setting.isApi and setting.domainName == "huggingface":
             logger.debug("Using HuggingFace API: model=%s", setting.modelName)
-            url = f"https://api-inference.huggingface.co/models/{setting.modelName}"
+            url     = f"https://api-inference.huggingface.co/models/{setting.modelName}"
             headers = {"Authorization": f"Bearer {setting.apiKey}"}
 
             full_prompt = prompt
@@ -118,11 +118,13 @@ def get_llm_response(prompt: str) -> str:
                 return f"HuggingFace JSON parse error: {e}"
 
             logger.debug("HuggingFace response data (truncated)=%s", str(data)[:1000])
+
             if isinstance(data, list) and len(data) > 0 and "generated_text" in data[0]:
                 result  = data[0]["generated_text"].replace(full_prompt, "").strip()
                 elapsed = time.perf_counter() - start_time
                 logger.debug("get_llm_response finished in %.3fs", elapsed)
                 return result
+            
 
             if isinstance(data, dict) and "error" in data:
                 logger.error("HuggingFace API returned error field: %s", data.get("error"))
