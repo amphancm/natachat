@@ -1,6 +1,7 @@
 import requests
 import logging
 import time
+import torch
 from sqlalchemy.orm import Session
 from libs.db import SessionLocal
 from schemas.models import Setting
@@ -54,6 +55,12 @@ def get_llm_response(prompt: str) -> str:
                     try:
                         tokenizer = AutoTokenizer.from_pretrained(setting.modelName)
                         model     = AutoModelForCausalLM.from_pretrained(setting.modelName)
+                        # Check if CUDA is available and move the model to the GPU
+                        if torch.cuda.is_available():
+                            logger.info("CUDA is available, moving model to GPU")
+                            model.to("cuda")
+                        else:
+                            logger.info("CUDA not available, using CPU")
                         model_cache[setting.modelName] = (tokenizer, model)
                     except (OSError, ValueError) as e:
                         logger.error(f"Failed to load user-specified model '{setting.modelName}': {e}")
@@ -62,7 +69,12 @@ def get_llm_response(prompt: str) -> str:
                     logger.info(f"Using cached model {setting.modelName}")
 
                 tokenizer, model = model_cache[setting.modelName]
-                inputs   = tokenizer(prompt, return_tensors="pt")
+
+                # Move inputs to the same device as the model
+                device = model.device
+                logger.info(f"Using device: {device}")
+                inputs = tokenizer(prompt, return_tensors="pt").to(device)
+
                 outputs  = model.generate(**inputs)
                 response = tokenizer.decode(outputs[0], skip_special_tokens=True)
                 return response
