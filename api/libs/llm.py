@@ -3,9 +3,12 @@ import logging
 import time
 import torch
 from sqlalchemy.orm import Session
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, TextStreamer, pipeline
 from libs.db import SessionLocal
 from schemas.models import Setting
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+from langchain import HuggingFacePipeline
 
 # Initialize module logger (fall back to basicConfig only if no handlers configured)
 logger = logging.getLogger(__name__)
@@ -15,11 +18,12 @@ logger.debug("llm module initialized")
 
 # Global cache for the model and tokenizer
 model_cache = {}
+memory_cache = {}
 
 def load_setting(db: Session):
     return db.query(Setting).first()
 
-def get_llm_response(prompt: str) -> str:
+def get_llm_response(prompt: str, room_id: str) -> str:
     start_time = time.perf_counter()
     logger.debug("get_llm_response called; prompt (truncated)=%s", (prompt or "")[:200])
 
@@ -53,11 +57,12 @@ def get_llm_response(prompt: str) -> str:
                 if setting.modelName not in model_cache:
                     logger.info(f"Loading model {setting.modelName}...")
                     try:
-                        tokenizer = AutoTokenizer.from_pretrained(setting.modelName)
-                        model     = AutoModelForCausalLM.from_pretrained(
+                        tokenizer = AutoTokenizer.from_pretrained(setting.modelName, use_fast=True)
+                        model = AutoModelForCausalLM.from_pretrained(
                             setting.modelName,
+                            load_in_8bit=False,
+                            torch_dtype=torch.float16,
                             device_map="auto",
-                            torch_dtype="auto"
                         )
                         model_cache[setting.modelName] = (tokenizer, model)
                     except (OSError, ValueError) as e:
@@ -68,15 +73,33 @@ def get_llm_response(prompt: str) -> str:
 
                 tokenizer, model = model_cache[setting.modelName]
 
-                device = "cuda" if torch.cuda.is_available() else "cpu"
-                inputs = tokenizer(
-                [
-                    f"{prompt}"
-                ], return_tensors = "pt").to(device)
+                streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
 
-                outputs = model.generate(**inputs, max_new_tokens = 64, use_cache = True)
-                response = tokenizer.batch_decode(outputs)[0]
-                return response
+                text_pipeline = pipeline(
+                    "text-generation",
+                    model=model,
+                    tokenizer=tokenizer,
+                    max_new_tokens=512,
+                    temperature=0.1,
+                    top_p=0.95,
+                    repetition_penalty=1.2,
+                    streamer=streamer,
+                )
+
+                llm = HuggingFacePipeline(pipeline=text_pipeline, model_kwargs={"temperature": 0.1})
+
+                if room_id not in memory_cache:
+                    memory_cache[room_id] = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+
+                memory = memory_cache[room_id]
+
+                multiturn_chat=ConversationalRetrievalChain.from_llm(llm=llm,
+                retriever=None,
+                verbose=False, memory=memory)
+
+                result=multiturn_chat(prompt)
+                return result['answer']
+
             except Exception as e:
                 logger.exception("Failed to load local model or generate response")
                 return f"Error with local model: {e}"

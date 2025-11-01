@@ -53,7 +53,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, username: str, 
             db.refresh(convo)
             logger.debug(f"Conversation created: id={convo.id}, query={data}")
 
-            response = get_llm_response(data)
+            response = get_llm_response(data, room_id)
             logger.debug(f"LLM response: {response}")
             convo.responseMessage = response
             db.commit()
