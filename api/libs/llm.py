@@ -74,7 +74,7 @@ def get_llm_response(prompt: str) -> str:
                     f"{prompt}"
                 ], return_tensors = "pt").to(device)
 
-                outputs = model.generate(**inputs, max_new_tokens = 64, use_cache = True)
+                outputs  = model.generate(**inputs, max_new_tokens = 64, use_cache = True)
                 response = tokenizer.batch_decode(outputs)[0]
                 return response
             except Exception as e:

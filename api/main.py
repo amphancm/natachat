@@ -30,7 +30,10 @@ def on_startup():
         db.refresh(new_user)
 
 # This regex allows requests from localhost, 127.0.0.1, and local IP addresses.
-allow_origin_regex = r"http://(localhost|127\.0\.0\.1|192\.168\..*):\d+"
+#allow_origin_regex = r"http://(localhost|127\.0\.0\.1|192\.168\..*):\d+"
+
+# This regex allows requests from localhost, 127.0.0.1, local IP addresses, and AWS EC2 instances.
+allow_origin_regex = r"https?://(localhost|127\.0\.0\.1|192\.168\..*|.*\.compute\.amazonaws\.com)(:\d+)?"
 
 app.add_middleware(
 	CORSMiddleware,
