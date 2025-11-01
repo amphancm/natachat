@@ -114,7 +114,8 @@ def get_llm_response(prompt: str, room_id: str) -> str:
                 chat_chain = ConversationChain(llm=llm , memory=memory)
 
                 result=chat_chain(prompt)
-                return result['answer']
+                #return result['answer']
+                return result['response']
 
             except Exception as e:
                 logger.exception("Failed to load local model or generate response")
