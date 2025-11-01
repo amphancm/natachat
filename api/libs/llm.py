@@ -102,7 +102,8 @@ def get_llm_response(prompt: str, room_id: str) -> str:
                 llm = HuggingFacePipeline(pipeline=text_pipeline, model_kwargs={"temperature": 0.1})
 
                 if room_id not in memory_cache:
-                    memory_cache[room_id] = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+                    #memory_cache[room_id] = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+                    memory_cache[room_id] = ConversationBufferMemory(memory_key='history', return_messages=True)
 
                 memory = memory_cache[room_id]
 
