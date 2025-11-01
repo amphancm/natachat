@@ -13,6 +13,8 @@ This is a modern AI chat application for document management and intelligent con
 2.  Install the dependencies from `pyproject.toml`:
     ```bash
     pip install "fastapi[standard]>=0.118.0" "google-genai>=1.42.0" "pwdlib[argon2]>=0.2.1" "pyjwt>=2.10.1" "requests>=2.32.5" "sqlmodel>=0.0.25" "websockets>=15.0.1"
+
+    pip install langchain==0.3.27 langchain_community==0.3.27
     ```
 3.  Run the backend server:
     ```bash

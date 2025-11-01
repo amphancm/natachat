@@ -6,9 +6,22 @@ from sqlalchemy.orm import Session
 from transformers import AutoTokenizer, AutoModelForCausalLM, TextStreamer, pipeline
 from libs.db import SessionLocal
 from schemas.models import Setting
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
+
 from langchain import HuggingFacePipeline
+#from langchain.chains import ConversationalRetrievalChain
+
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferMemory
+
+
+# from langchain_community.llms import HuggingFacePipeline
+#from langchain_community.chains import ConversationalRetrievalChain
+# from langchain_community.memory import ConversationBufferMemory
+
+#from langchain_community.llms import HuggingFacePipeline
+#from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
+#from langchain.memory import ConversationBufferMemory
+
 
 # Initialize module logger (fall back to basicConfig only if no handlers configured)
 logger = logging.getLogger(__name__)
@@ -17,7 +30,7 @@ if not logging.getLogger().handlers:
 logger.debug("llm module initialized")
 
 # Global cache for the model and tokenizer
-model_cache = {}
+model_cache  = {}
 memory_cache = {}
 
 def load_setting(db: Session):
@@ -93,11 +106,13 @@ def get_llm_response(prompt: str, room_id: str) -> str:
 
                 memory = memory_cache[room_id]
 
-                multiturn_chat=ConversationalRetrievalChain.from_llm(llm=llm,
-                retriever=None,
-                verbose=False, memory=memory)
+                # multiturn_chat=ConversationalRetrievalChain.from_llm(llm=llm,
+                # retriever=None,
+                # verbose=False, memory=memory)
 
-                result=multiturn_chat(prompt)
+                chat_chain = ConversationChain(llm=llm , memory=memory)
+
+                result=chat_chain(prompt)
                 return result['answer']
 
             except Exception as e:
