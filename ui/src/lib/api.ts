@@ -1,5 +1,13 @@
 import { jwtDecode } from "jwt-decode";
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+//const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+// Prefer an explicit VITE_API_BASE_URL. If not provided, default to the same host/protocol
+// the frontend is served from and port 8000 (useful when hosting frontend on an EC2 instance).
+const DEFAULT_PORT = import.meta.env.VITE_API_PORT || "8000";
+const inferredBase =
+  typeof window !== "undefined"
+    ? `${window.location.protocol}//${window.location.hostname}:${DEFAULT_PORT}`
+    : `http://127.0.0.1:${DEFAULT_PORT}`;
+const API_BASE = import.meta.env.VITE_API_BASE_URL || inferredBase;
 
 export type TokenResponse = {
   access_token: string;

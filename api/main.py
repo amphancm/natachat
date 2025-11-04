@@ -33,7 +33,8 @@ def on_startup():
 #allow_origin_regex = r"http://(localhost|127\.0\.0\.1|192\.168\..*):\d+"
 
 # This regex allows requests from localhost, 127.0.0.1, local IP addresses, and AWS EC2 instances.
-allow_origin_regex = r"https?://(localhost|127\.0\.0\.1|192\.168\..*|.*\.compute\.amazonaws\.com)(:\d+)?"
+#allow_origin_regex = r"https?://(localhost|127\.0\.0\.1|192\.168\..*|.*\.compute\.amazonaws\.com)(:\d+)?"
+allow_origin_regex = r"http://(localhost|127\.0\.0\.1|192\.168\..*|13\.113\.161\.50|.*\.compute\.amazonaws\.com):\d+"
 
 app.add_middleware(
 	CORSMiddleware,

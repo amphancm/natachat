@@ -31,6 +31,19 @@ interface Message {
   roomId?: string
 }
 
+// UUID fallback for environments without crypto.randomUUID
+function getUUID() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  // Simple RFC4122 version 4 UUID polyfill
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 function generateRoomName(message?: string) {
   if (message) {
     const words = message.split(" ")
@@ -97,7 +110,7 @@ export default function Chat() {
         const existingRooms = res.map((r) => ({ id: r.id, name: r.roomName })).sort((a, b) => (a.id > b.id ? -1 : 1))
 
         const tempRoom: Room = {
-          id: crypto.randomUUID(),
+          id: getUUID(),
           name: generateRoomName(),
           isTemp: true,
         }
@@ -106,7 +119,7 @@ export default function Chat() {
         setCurrentRoom(tempRoom)
       } catch {
         const tempRoom: Room = {
-          id: crypto.randomUUID(),
+          id: getUUID(),
           name: generateRoomName(),
           isTemp: true,
         }
@@ -140,7 +153,7 @@ export default function Chat() {
       currentRoom.id,
       (data) => {
         const aiMessage: Message = {
-          id: crypto.randomUUID(),
+          id: getUUID(),
           role: "assistant",
           content: data,
           timestamp: new Date(),
@@ -178,14 +191,14 @@ export default function Chat() {
       const history = await chatApi.getRoomHistory(room.id)
       const formattedMessages: Message[] = history.flatMap((msg) => [
         {
-          id: crypto.randomUUID(),
+          id: getUUID(),
           role: "user",
           content: msg.query,
           timestamp: new Date(msg.timestamp),
           roomId: room.id,
         },
         {
-          id: crypto.randomUUID(),
+          id: getUUID(),
           role: "assistant",
           content: msg.response,
           timestamp: new Date(msg.timestamp),
@@ -217,7 +230,7 @@ export default function Chat() {
           activeRoom.id,
           (data) => {
             const aiMessage: Message = {
-              id: crypto.randomUUID(),
+              id: getUUID(),
               role: "assistant",
               content: data,
               timestamp: new Date(),
@@ -240,7 +253,7 @@ export default function Chat() {
       }
 
       const userMessage: Message = {
-        id: crypto.randomUUID(),
+        id: getUUID(),
         role: "user",
         content: message,
         timestamp: new Date(),
@@ -283,7 +296,7 @@ export default function Chat() {
     }
 
     const tempRoom: Room = {
-      id: crypto.randomUUID(),
+      id: getUUID(),
       name: generateRoomName(),
       isTemp: true,
     };
