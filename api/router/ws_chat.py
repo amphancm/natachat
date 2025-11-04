@@ -2,6 +2,8 @@ import uuid
 import logging
 from dependency import get_db
 from libs.llm import get_llm_response
+import asyncio
+from threading import Thread
 
 from sqlalchemy.orm import Session
 from fastapi import WebSocket, WebSocketDisconnect, Depends, APIRouter
@@ -11,6 +13,15 @@ router = APIRouter(prefix="/ws", tags=["websocket"])
 
 logger = logging.getLogger("ws_chat")
 logging.basicConfig(level=logging.DEBUG)
+
+async def async_generator(streamer):
+    while True:
+        try:
+            # Run the blocking iterator in a separate thread
+            next_item = await asyncio.to_thread(next, iter(streamer))
+            yield next_item
+        except StopIteration:
+            break
 
 @router.websocket("/chat/{room_id}/{username}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str, username: str, db: Session = Depends(get_db)):
@@ -53,9 +64,21 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, username: str, 
             db.refresh(convo)
             logger.debug(f"Conversation created: id={convo.id}, query={data}")
 
-            response = get_llm_response(data)
-            logger.debug(f"LLM response: {response}")
-            convo.responseMessage = response
+            streamer_response = get_llm_response(room_id, data)
+
+            # Start generation in a separate thread
+            thread = Thread(target=lambda: streamer_response.model.generate(**streamer_response.inputs, streamer=streamer_response.streamer, max_new_tokens=64, use_cache=True))
+            thread.start()
+
+            # Stream response back to the client
+            generated_text = ""
+            async for new_text in async_generator(streamer_response.streamer):
+                generated_text += new_text
+                await websocket.send_text(generated_text)
+
+            thread.join()
+            logger.debug(f"LLM response: {generated_text}")
+            convo.responseMessage = generated_text
             db.commit()
             logger.debug(f"Conversation updated with response: id={convo.id}")
 
@@ -63,9 +86,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, username: str, 
             db.add(msg)
             db.commit()
             logger.debug(f"Message created: conversation_id={convo.id}, senderUsername={username}")
-
-            await websocket.send_text(response)
-            logger.debug(f"Sent response to user {username} in room {room_id}")
 
     except WebSocketDisconnect:
         logger.info(f"Room {room_id} (user={username}): client disconnected")

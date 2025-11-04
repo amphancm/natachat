@@ -3,9 +3,9 @@ import logging
 import time
 import torch
 from sqlalchemy.orm import Session
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
 from libs.db import SessionLocal
-from schemas.models import Setting
+from schemas.models import Setting, Conversation, ChatRoom
 
 # Initialize module logger (fall back to basicConfig only if no handlers configured)
 logger = logging.getLogger(__name__)
@@ -19,9 +19,9 @@ model_cache = {}
 def load_setting(db: Session):
     return db.query(Setting).first()
 
-def get_llm_response(prompt: str) -> str:
+def get_llm_response(room_id: str, prompt: str) -> str:
     start_time = time.perf_counter()
-    logger.debug("get_llm_response called; prompt (truncated)=%s", (prompt or "")[:200])
+    logger.debug(f"get_llm_response called; room_id={room_id} prompt (truncated)={(prompt or '')[:200]}")
 
     db = SessionLocal()
     try:
@@ -69,14 +69,27 @@ def get_llm_response(prompt: str) -> str:
                 tokenizer, model = model_cache[setting.modelName]
 
                 device = "cuda" if torch.cuda.is_available() else "cpu"
-                inputs = tokenizer(
-                [
-                    f"{prompt}"
-                ], return_tensors = "pt").to(device)
+                # 履歴の取得
+                conversations = db.query(Conversation).filter(Conversation.chatRoom_id == room_id).order_by(Conversation.timestamp).all()
 
-                outputs  = model.generate(**inputs, max_new_tokens = 64, use_cache = True)
-                response = tokenizer.batch_decode(outputs)[0]
-                return response
+                messages = []
+                for conv in conversations:
+                    messages.append({"role": "user", "content": conv.query})
+                    if conv.responseMessage:
+                        messages.append({"role": "assistant", "content": conv.responseMessage})
+
+                messages.append({"role": "user", "content": prompt})
+
+                texts = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+                inputs = tokenizer(text=texts, return_tensors="pt").to(device)
+
+                from collections import namedtuple
+                StreamerResponse = namedtuple('StreamerResponse', ['model', 'inputs', 'streamer'])
+
+                streamer = TextIteratorStreamer(tokenizer, skip_special_tokens=True, skip_prompt=True)
+
+                return StreamerResponse(model=model, inputs=inputs, streamer=streamer)
             except Exception as e:
                 logger.exception("Failed to load local model or generate response")
                 return f"Error with local model: {e}"
