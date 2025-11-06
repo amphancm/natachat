@@ -152,15 +152,27 @@ export default function Chat() {
     const newSocket = connectChatSocket(
       currentRoom.id,
       (data) => {
-        const aiMessage: Message = {
-          id: getUUID(),
-          role: "assistant",
-          content: data,
-          timestamp: new Date(),
-          roomId: currentRoom.id,
-          feedback: null,
-        }
-        setMessages((prev) => [...prev, aiMessage])
+        setMessages((prev) => {
+          const lastMessage = prev[prev.length - 1]
+          if (lastMessage && lastMessage.role === "assistant") {
+            const updatedMessages = [...prev]
+            updatedMessages[prev.length - 1] = {
+              ...lastMessage,
+              content: data,
+            }
+            return updatedMessages
+          } else {
+            const aiMessage: Message = {
+              id: getUUID(),
+              role: "assistant",
+              content: data,
+              timestamp: new Date(),
+              roomId: currentRoom.id,
+              feedback: null,
+            }
+            return [...prev, aiMessage]
+          }
+        })
         setIsWaitingForResponse(false)
       },
       (err) => setError(err),
@@ -229,15 +241,27 @@ export default function Chat() {
         const newSocket = connectChatSocket(
           activeRoom.id,
           (data) => {
-            const aiMessage: Message = {
-              id: getUUID(),
-              role: "assistant",
-              content: data,
-              timestamp: new Date(),
-              roomId: activeRoom.id,
-              feedback: null,
-            };
-            setMessages((prev) => [...prev, aiMessage]);
+            setMessages((prev) => {
+              const lastMessage = prev[prev.length - 1];
+              if (lastMessage && lastMessage.role === "assistant") {
+                const updatedMessages = [...prev];
+                updatedMessages[prev.length - 1] = {
+                  ...lastMessage,
+                  content: data,
+                };
+                return updatedMessages;
+              } else {
+                const aiMessage: Message = {
+                  id: getUUID(),
+                  role: "assistant",
+                  content: data,
+                  timestamp: new Date(),
+                  roomId: activeRoom.id,
+                  feedback: null,
+                };
+                return [...prev, aiMessage];
+              }
+            });
             setIsWaitingForResponse(false);
           },
           (err) => setError(err)
