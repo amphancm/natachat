@@ -50,6 +50,9 @@ def get_llm_response(room_id: str, prompt: str) -> str:
 
         if setting.isLocal:
             logger.debug("Using local model")
+            
+            max_max_tokens = 2048  # maximum possible tokens (custom value, adjust as needed)
+            
             try:
                 if setting.modelName not in model_cache:
                     logger.info(f"Loading model {setting.modelName}...")
@@ -70,11 +73,18 @@ def get_llm_response(room_id: str, prompt: str) -> str:
                 tokenizer, model = model_cache[setting.modelName]
 
                 device = "cuda" if torch.cuda.is_available() else "cpu"
-                # 履歴の取得
+                # Get history
                 room_uuid = uuid.UUID(room_id)
                 conversations = db.query(Conversation).filter(Conversation.chatRoom_id == room_uuid).order_by(Conversation.timestamp).all()
 
                 messages = []
+                
+                # system prompt
+                messages.append({
+                    "role": "system",
+                    "content":  setting.systemPrompt}
+                )
+                
                 for conv in conversations:
                     messages.append({"role": "user", "content": conv.query})
                     if conv.responseMessage:
@@ -87,11 +97,25 @@ def get_llm_response(room_id: str, prompt: str) -> str:
                 inputs = tokenizer(text=texts, return_tensors="pt").to(device)
 
                 from collections import namedtuple
-                StreamerResponse = namedtuple('StreamerResponse', ['model', 'inputs', 'streamer'])
+                StreamerResponse = namedtuple('StreamerResponse', ['model', 'inputs', 'streamer', 'max_max_tokens'])
 
                 streamer = TextIteratorStreamer(tokenizer, skip_special_tokens=True, skip_prompt=True)
 
-                return StreamerResponse(model=model, inputs=inputs, streamer=streamer)
+                # Only include the basic input tensors in generation_kwargs
+                generation_kwargs = {
+                    "input_ids": inputs["input_ids"],
+                    "attention_mask": inputs["attention_mask"] if "attention_mask" in inputs else None,
+                    "temperature": setting.temperature or 0.1,
+                }
+                # Remove None values from the dict
+                generation_kwargs = {k: v for k, v in generation_kwargs.items() if v is not None}
+                
+                return StreamerResponse(
+                    model=model,
+                    inputs=generation_kwargs,
+                    streamer=streamer,
+                    max_max_tokens=max_max_tokens
+                )
             except Exception as e:
                 logger.exception("Failed to load local model or generate response")
                 return f"Error with local model: {e}"
@@ -140,7 +164,6 @@ def get_llm_response(room_id: str, prompt: str) -> str:
                 logger.debug("get_llm_response finished in %.3fs", elapsed)
                 return result
             
-
             if isinstance(data, dict) and "error" in data:
                 logger.error("HuggingFace API returned error field: %s", data.get("error"))
                 return f"HuggingFace API Error: {data['error']}"
