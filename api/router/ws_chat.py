@@ -14,14 +14,18 @@ router = APIRouter(prefix="/ws", tags=["websocket"])
 logger = logging.getLogger("ws_chat")
 logging.basicConfig(level=logging.DEBUG)
 
+def get_next(streamer):
+    try:
+        return next(iter(streamer))
+    except StopIteration:
+        return None
+
 async def async_generator(streamer):
     while True:
-        try:
-            # Run the blocking iterator in a separate thread
-            next_item = await asyncio.to_thread(next, iter(streamer))
-            yield next_item
-        except StopIteration:
+        next_item = await asyncio.to_thread(get_next, streamer)
+        if next_item is None:
             break
+        yield next_item
 
 @router.websocket("/chat/{room_id}/{username}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str, username: str, db: Session = Depends(get_db)):
