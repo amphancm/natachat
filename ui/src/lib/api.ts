@@ -95,9 +95,29 @@ export async function fetchWithAuth(input: RequestInfo | string, init?: RequestI
   return res;
 }
 
+export async function register(username: string, password: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+
+  if (!res.ok) {
+    let errMsg = res.statusText;
+    try {
+      const j = await res.json();
+      errMsg = j.detail || j.error || JSON.stringify(j);
+    } catch (e) {
+      // ignore
+    }
+    throw new Error(errMsg || `HTTP ${res.status}`);
+  }
+}
+
 export default {
   API_BASE,
   login,
+  register,
   getToken,
   setToken,
   clearToken,

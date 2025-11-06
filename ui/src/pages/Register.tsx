@@ -3,38 +3,42 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import natachatLogo from "@/assets/natachat-logo.png";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 
-export default function Login() {
+export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
       setError("Please enter both username and password.");
     } else {
       setError("");
 
-      // Call backend
+      // Call backend to register
       api
-        .login(username, password)
-        .then((data) => {
-          api.setToken(data.access_token);
-          navigate("/chat");
+        .register(username, password)
+        .then(() => {
+          navigate("/");
         })
         .catch((err) => {
-          console.error("Login error:", err);
-          setError(err.message || "Login failed");
+          console.error("Registration error:", err);
+          setError(err.message || "Registration failed");
         });
     }
+  };
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newUsername = e.target.value;
+    setUsername(newUsername);
+    setPassword(newUsername);
   };
 
   return (
@@ -48,17 +52,17 @@ export default function Login() {
               <span className="text-primary"> AI</span>
             </h1>
           </div>
-          <p className="text-muted-foreground">Please login to continue</p>
+          <p className="text-muted-foreground">Create a new account</p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
                 type="text"
                 value={username}
-                onChange={e => setUsername(e.target.value)}
+                onChange={handleUsernameChange}
                 placeholder="Enter your username"
                 className="h-11"
               />
@@ -90,29 +94,14 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Checkbox id="remember" />
-              <Label htmlFor="remember" className="text-sm">
-                Remember me
-              </Label>
-            </div>
-
             {error && (
               <div className="text-destructive text-sm">{error}</div>
             )}
 
             <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90">
-              Login
+              Create User
             </Button>
           </form>
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-primary hover:underline">
-                Register
-              </Link>
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

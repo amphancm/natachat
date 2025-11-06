@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Documents from "./pages/Documents";
 import UploadFiles from "./pages/UploadFiles";
 import SystemPrompt from "./pages/SystemPrompt";
@@ -23,6 +24,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/documents" element={<Documents />} />
           {/* <Route path="/upload-files" element={<UploadFiles />} /> */}
           <Route path="/system-prompt" element={<SystemPrompt />} />
