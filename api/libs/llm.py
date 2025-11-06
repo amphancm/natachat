@@ -2,6 +2,7 @@ import requests
 import logging
 import time
 import torch
+import uuid
 from sqlalchemy.orm import Session
 from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
 from libs.db import SessionLocal
@@ -70,7 +71,8 @@ def get_llm_response(room_id: str, prompt: str) -> str:
 
                 device = "cuda" if torch.cuda.is_available() else "cpu"
                 # 履歴の取得
-                conversations = db.query(Conversation).filter(Conversation.chatRoom_id == room_id).order_by(Conversation.timestamp).all()
+                room_uuid = uuid.UUID(room_id)
+                conversations = db.query(Conversation).filter(Conversation.chatRoom_id == room_uuid).order_by(Conversation.timestamp).all()
 
                 messages = []
                 for conv in conversations:

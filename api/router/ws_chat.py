@@ -66,6 +66,11 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, username: str, 
 
             streamer_response = get_llm_response(room_id, data)
 
+            if isinstance(streamer_response, str):
+                logger.error(f"LLM response is an error string: {streamer_response}")
+                await websocket.send_text(streamer_response)
+                continue
+
             # Start generation in a separate thread
             thread = Thread(target=lambda: streamer_response.model.generate(**streamer_response.inputs, streamer=streamer_response.streamer, max_new_tokens=64, use_cache=True))
             thread.start()
