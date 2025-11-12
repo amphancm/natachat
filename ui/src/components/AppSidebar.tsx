@@ -13,7 +13,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button" 
-import natachatLogo from "@/assets/natachat-logo.png"
+import natachatLogo from "@/assets/mea.jpg"
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 

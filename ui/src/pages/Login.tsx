@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import natachatLogo from "@/assets/natachat-logo.png";
+import natachatLogo from "@/assets/mea.jpg";
 import { useNavigate, Link } from "react-router-dom";
 import api from "@/lib/api";
 
