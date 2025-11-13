@@ -48,13 +48,13 @@ export function AppSidebar() {
         <div className="flex items-center gap-3 p-4 border-b border-sidebar-border">
           <img
             src={natachatLogo || "/placeholder.svg"}
-            alt="Natachat AI"
+            alt="MEA Expert System"
             className={isCollapsed ? "w-8 h-4" : "w-8 h-7"}
           />
           {!isCollapsed && (
             <div className="flex items-center gap-1">
-              <span className="font-semibold text-sidebar-foreground">Natachat</span>
-              <span className="font-semibold text-primary">AI</span>
+              <span className="font-semibold text-sidebar-foreground">MEA Expert</span>
+              <span className="font-semibold text-primary">System</span>
             </div>
           )}
         </div>

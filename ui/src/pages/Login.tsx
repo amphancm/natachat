@@ -42,10 +42,10 @@ export default function Login() {
       <Card className="w-full max-w-md shadow-medium">
         <CardHeader className="text-center pb-4">
           <div className="flex items-center justify-center gap-3 mb-2">
-            <img src={natachatLogo} alt="Natachat AI" className="w-10 h-10" />
+            <img src={natachatLogo} alt="MEA Expert System" className="w-10 h-10" />
             <h1 className="text-2xl font-bold">
-              <span className="text-foreground">Natachat</span>
-              <span className="text-primary"> AI</span>
+              <span className="text-foreground">MEA Expert</span>
+              <span className="text-primary"> System</span>
             </h1>
           </div>
           <p className="text-muted-foreground">Please login to continue</p>

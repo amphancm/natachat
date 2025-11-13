@@ -1,4 +1,4 @@
-# Natachat AI
+# MEA Expert System
 
 This is a modern AI chat application for document management and intelligent conversations.
 

@@ -1,7 +1,7 @@
 [project]
 name = "api"
 version = "0.1.2"
-description = "API used by Natachat AI"
+description = "API used by MEA Expert System"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
