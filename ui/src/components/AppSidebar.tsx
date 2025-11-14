@@ -53,8 +53,9 @@ export function AppSidebar() {
           />
           {!isCollapsed && (
             <div className="flex items-center gap-1">
-              <span className="font-semibold text-sidebar-foreground">MEA Expert</span>
-              <span className="font-semibold text-primary">System</span>
+              <span className="font-semibold text-primary">MEA</span>
+              <span className="font-semibold text-sidebar-foreground"> Expert System</span>
+              
             </div>
           )}
         </div>

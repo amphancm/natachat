@@ -48,8 +48,8 @@ export default function Register() {
           <div className="flex items-center justify-center gap-3 mb-2">
             <img src={natachatLogo} alt="MEA Expert System" className="w-10 h-10" />
             <h1 className="text-2xl font-bold">
-              <span className="text-foreground">MEA Expert</span>
-              <span className="text-primary"> System</span>
+              <span className="text-primary">MEA</span>
+              <span className="text-foreground"> Expert System</span>
             </h1>
           </div>
           <p className="text-muted-foreground">Create a new account</p>
