@@ -512,11 +512,20 @@ export default function Chat() {
                       <div className="space-y-2">
                         <div className="flex justify-start">
                           <div className="bg-muted rounded-2xl px-4 py-3 max-w-[80%] prose prose-sm dark:prose-invert">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {msg.content.replace(/\n/g, "  \n")}
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                ol: ({ children }) => <ol className="list-decimal ml-5">{children}</ol>,
+                                ul: ({ children }) => <ul className="list-disc ml-5">{children}</ul>,
+                                li: ({ children }) => <li className="ml-1">{children}</li>,
+                                p: ({ children }) => <p className="leading-relaxed">{children}</p>,
+                              }}
+                            >
+                              {msg.content}
                             </ReactMarkdown>
                           </div>
                         </div>
+
                         <div className="flex gap-2 ml-2">
                           <Button
                             variant="ghost"
