@@ -14,6 +14,7 @@ import { uniqueNamesGenerator, adjectives, colors, animals } from "unique-names-
 // 🆕 Markdown imports
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import remarkBreaks from "remark-breaks"
 
 interface Room {
   id: string
@@ -512,9 +513,7 @@ export default function Chat() {
                       <div className="space-y-2">
                         <div className="flex justify-start">
                           <div className="bg-muted rounded-2xl px-4 py-3 max-w-[80%] prose prose-sm dark:prose-invert">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {msg.content.replace(/\n/g, "  \n")}
-                            </ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{msg.content}</ReactMarkdown>
                           </div>
                         </div>
                         <div className="flex gap-2 ml-2">
