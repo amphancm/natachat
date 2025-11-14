@@ -513,7 +513,7 @@ export default function Chat() {
                         <div className="flex justify-start">
                           <div className="bg-muted rounded-2xl px-4 py-3 max-w-[80%] prose prose-sm dark:prose-invert">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {msg.content}
+                              {msg.content.replace(/\n/g, "  \n")}
                             </ReactMarkdown>
                           </div>
                         </div>
