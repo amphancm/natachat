@@ -14,7 +14,7 @@ class SettingModel(BaseModel):
     domainName: Optional[str] = None         
     apiKey: Optional[str]     = None
     modelName: Optional[str]  = None
-    temperature: Optional[float] = 0.7
+    temperature: Optional[float] = 0.1
     systemPrompt: Optional[str]  = None
 
     class Config:
